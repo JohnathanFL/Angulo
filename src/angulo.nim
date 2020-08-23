@@ -1,6 +1,7 @@
 import strformat
 import tables
 import json
+import math
 
 
 import swiss
@@ -93,6 +94,8 @@ when isMainModule:
     ascmc[0].addr,
   )
   checkError fmt"Failed to get house cusps", ERR_CANT_CUSPS
+  proc houseAngle(i: int): float = # Used later in planet calcs
+    return cusps[1..12][i mod 12]
 
   err = swe_calc(
     etJulDay,
@@ -119,12 +122,27 @@ when isMainModule:
       xx[0].addr,
     )
     checkError fmt"Failed to swe_calc {planetName}", ERR_CANT_PLANET
-    planets[planetName] = swe_house_pos(
+    let angle = swe_house_pos(
       armc, geolong,
       eps,
       Placidus,
       xx[0].addr, # lat/long in the first 2 of xx from swe_calc
     )
+    # angle is currently in the format `house.pct_way_through_house`
+    # Now convert it to an absolute angle in the system ccw from <1,0>
+    var
+      house = angle.floor
+      a = houseAngle(house.int) # The house it's in
+      b = houseAngle(house.int + 1) # The house it's a percentage of the way to
+      pct = angle - house
+    if b < a: b += 360
+    #echo "Planet ", planetName, " was ", pct*100, "% of the way between ", a, " and ", b
+    var res = a + (b - a) * pct
+    if res > 360: res -= 360
+    planets[planetName] = res
+
+
+    
   echo pretty %*{
     "signRot": asc,
     "mc": mc,
