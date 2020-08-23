@@ -34,7 +34,7 @@ const AllPlanets = [
   (bodyUranus, "uranus"),
   (bodyNeptune, "neptune"),
   (bodyPluto, "pluto"),
-  (bodyOscuApog, "lilith"),
+  #(bodyOscuApog, "lilith"),
 ]
 # Note that we also place the ascendant in the planets json array, but it's actually handled
 # outside swe_calc code for planets
